@@ -1,3 +1,7 @@
+# Google Application Default Credentials
+# https://cloud.google.com/docs/authentication/production#finding_credentials_automatically
+*.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
