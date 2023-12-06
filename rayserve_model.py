@@ -1,8 +1,6 @@
-import ray
 from ray import serve
 from fastapi import FastAPI
 from google.cloud import storage, bigquery
-import numpy as np
 import tensorflow as tf
 
 # Constants
@@ -88,6 +86,13 @@ class ModelPredictor:
         stringlist = []
         self.model.summary(print_fn=lambda x: stringlist.append(x))
         return stringlist
+    
+    @app.get("/health")
+    async def health(self):
+        if self.model:
+            return "Model is loaded"
+        else:
+            return "Model is not loaded"
 
 
 model_predictor = ModelPredictor.bind()

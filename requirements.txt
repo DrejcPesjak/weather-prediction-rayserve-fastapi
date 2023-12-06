@@ -1,0 +1,7 @@
+ray[serve]
+fastapi
+google-cloud-storage
+google-cloud-bigquery
+numpy
+pandas
+tensorflow
