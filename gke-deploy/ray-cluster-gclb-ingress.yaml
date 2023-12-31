@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: ray-cluster-ingress
   annotations:
-    kubernetes.io/ingress.class: "gce-internal"
+    kubernetes.io/ingress.class: "gce"
 spec:
   rules:
     - http:
@@ -12,6 +12,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: rvice-weather-prediction-raycluster-2n6mk-head-svc #raycluster-kuberay-head-svc # Update this line with your head service in Step 3 below.
+                name: rvice-weather-prediction-raycluster-5phmv-head-svc
                 port:
                   number: 8000 
