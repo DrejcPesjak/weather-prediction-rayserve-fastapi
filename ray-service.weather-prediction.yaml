@@ -2,13 +2,13 @@
 # For examples with more realistic resource configuration, see
 # ray-cluster.complete.large.yaml and
 # ray-cluster.autoscaler.large.yaml.
-apiVersion: ray.io/v1
+apiVersion: ray.io/v1alpha1
 kind: RayService
 metadata:
   name: rayservice-weather-prediction
 spec:
-  serviceUnhealthySecondThreshold: 900 # Config for the health check threshold for Ray Serve applications. Default value is 900.
-  deploymentUnhealthySecondThreshold: 300 # Config for the health check threshold for Ray dashboard agent. Default value is 300.
+  serviceUnhealthySecondThreshold: 1900 # Config for the health check threshold for Ray Serve applications. Default value is 900.
+  deploymentUnhealthySecondThreshold: 900 # Config for the health check threshold for Ray dashboard agent. Default value is 300.
   # serveConfigV2 takes a yaml multi-line scalar, which should be a Ray Serve multi-application config. See https://docs.ray.io/en/latest/serve/multi-app.html.
   # Only one of serveConfig and serveConfigV2 should be used.
   serveConfigV2: |
@@ -24,6 +24,7 @@ spec:
             - numpy
             - pandas
             - tensorflow
+            - db-dtypes
         deployments:
           - name: ModelPredictor
             num_replicas: 1
@@ -42,6 +43,7 @@ spec:
       #pod template
       template:
         spec:
+          serviceAccountName: k8s-drejc
           containers:
             - name: ray-head
               image: rayproject/ray:2.6.3
@@ -49,9 +51,11 @@ spec:
                 limits:
                   cpu: 2
                   memory: 2Gi
+                  ephemeral-storage: 2Gi
                 requests:
                   cpu: 2
                   memory: 2Gi
+                  ephemeral-storage: 2Gi
               ports:
                 - containerPort: 6379
                   name: gcs-server
@@ -75,6 +79,7 @@ spec:
         #pod template
         template:
           spec:
+            serviceAccountName: k8s-drejc
             containers:
               - name: ray-worker # must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character (e.g. 'my-name',  or '123-abc'
                 image: rayproject/ray:2.6.3
@@ -84,8 +89,10 @@ spec:
                       command: ["/bin/sh","-c","ray stop"]
                 resources:
                   limits:
-                    cpu: "1"
+                    cpu: "2"
                     memory: "2Gi"
+                    ephemeral-storage: 2Gi
                   requests:
-                    cpu: "500m"
+                    cpu: "2"
                     memory: "2Gi"
+                    ephemeral-storage: 2Gi

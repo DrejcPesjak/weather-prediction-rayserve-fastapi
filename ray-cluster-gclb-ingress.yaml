@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ray-cluster-ingress
+  annotations:
+    kubernetes.io/ingress.class: "gce-internal"
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /weather_prediction_model
+            pathType: Prefix
+            backend:
+              service:
+                name: rvice-weather-prediction-raycluster-2n6mk-head-svc #raycluster-kuberay-head-svc # Update this line with your head service in Step 3 below.
+                port:
+                  number: 8000 
