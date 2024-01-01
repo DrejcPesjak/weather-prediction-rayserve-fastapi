@@ -1,5 +1,5 @@
 from ray import serve
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from google.cloud import storage, bigquery
 import tensorflow as tf
 
@@ -32,18 +32,21 @@ def get_best_model_name():
         raise ValueError("Best model file not found")
 
 def get_data():
-    client = bigquery.Client(project=PROJECT_ID)
-    query = f"""
-        SELECT * 
-        FROM `{PROJECT_ID}.{DATASET_ID}.{WEATHER_TABLE_ID}`
-        ORDER BY time
-        LIMIT 1
-    """
-    query_job = client.query(query)
-    df = query_job.to_dataframe()
-    df.set_index('time', inplace=True)
-    df = df.astype('float32')
-    return df
+    try:
+        client = bigquery.Client(project=PROJECT_ID)
+        query = f"""
+            SELECT * 
+            FROM `{PROJECT_ID}.{DATASET_ID}.{WEATHER_TABLE_ID}`
+            ORDER BY time
+            LIMIT 1
+        """
+        query_job = client.query(query)
+        df = query_job.to_dataframe()
+        df.set_index('time', inplace=True)
+        df = df.astype('float32')
+        return df
+    except Exception as e:
+        return None
 
 # Ray Serve deployment
 @serve.deployment
@@ -62,11 +65,17 @@ class ModelPredictor:
     
     @app.get("/")
     async def root(self):
+        if self.model is None:
+            raise HTTPException(status_code=500, detail="Model is not loaded")
         return f"Hello, we are using model {self.model_name}!"
 
     @app.get("/predict")
     async def predict(self):
         data = get_data()
+        if data is None:
+            raise HTTPException(status_code=500, detail="Data is not loaded")
+        if self.model is None:
+            raise HTTPException(status_code=500, detail="Model is not loaded")
         prediction = self.model.predict(data)
         temp_prediction, precip_prediction = prediction
         return {
@@ -83,6 +92,9 @@ class ModelPredictor:
     
     @app.get("/summary")
     async def summary(self):
+        if self.model is None:
+            raise HTTPException(status_code=500, detail="Model is not loaded")
+        
         stringlist = []
         self.model.summary(print_fn=lambda x: stringlist.append(x))
         return stringlist
@@ -92,7 +104,7 @@ class ModelPredictor:
         if self.model:
             return "Model is loaded"
         else:
-            return "Model is not loaded"
+            raise HTTPException(status_code=500, detail="Model is not loaded")
 
 
 model_predictor = ModelPredictor.bind()
