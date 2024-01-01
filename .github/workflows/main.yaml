@@ -39,4 +39,4 @@ jobs:
 
     - name: Deploy to GKE
       run: |
-        kubectl apply -f gke-deploy/ray-service.weather-prediction.yaml
+        kubectl apply -f gke-deploy/ray-service.weather-prediction.yaml --validate=false
