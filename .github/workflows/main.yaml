@@ -1,0 +1,42 @@
+name: CI/CD Pipeline for Ray Serve on GKE
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'rayserve_model.py'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'rayserve_model.py'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@master
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        export_default_credentials: true
+    
+    - name: Install kubectl
+      uses: azure/setup-kubectl@v1
+
+    - name: Configure kubectl
+      run: |
+        gcloud container clusters get-credentials rayserve-cluster --zone europe-central2
+
+    - name: Update working_dir in RayService Config
+      run: |
+        REPO_ZIP_URL="https://github.com/DrejcPesjak/weather-prediction-rayserve-fastapi/archive/${{ github.sha }}.zip"
+        sed -i "s|working_dir:.*|working_dir: \"$REPO_ZIP_URL\"|" gke-deploy/ray-service.weather-prediction.yaml
+
+    - name: Deploy to GKE
+      run: |
+        kubectl apply -f gke-deploy/ray-service.weather-prediction.yaml
