@@ -3,6 +3,9 @@ from fastapi import FastAPI, HTTPException
 from google.cloud import storage, bigquery
 import tensorflow as tf
 
+# app version
+__version__ = '0.1.0'
+
 # Constants
 BUCKET_NAME = 'europe-central2-rso-ml-airf-05c3abe0-bucket'
 MODEL_DIR = 'models'
