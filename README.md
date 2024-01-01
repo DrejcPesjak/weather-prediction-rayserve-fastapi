@@ -34,6 +34,15 @@ To build and run a Docker image (note: this functionality is currently not opera
 
 ## Deploying to Google Kubernetes Engine (GKE)
 
+For detailed setup commands, see [GKE Commands](gke-deploy/gke-commands.sh).
+
+Also refer to Ray.Io docs for more info:
+- [RayServe Kubernetes Deployment Guide](https://docs.ray.io/en/latest/serve/production-guide/kubernetes.html)
+- [RayServe Kubernetes Ingress Guide](https://docs.ray.io/en/master/cluster/kubernetes/k8s-ecosystem/ingress.html#kuberay-ingress)
+- [Kuberay GitHub Repository - Samples](https://github.com/ray-project/kuberay/tree/master/ray-operator/config/samples)
+
+
+
 ### Initial Setup
 1. **List Google Cloud Projects**:
    ```bash
@@ -97,12 +106,20 @@ To build and run a Docker image (note: this functionality is currently not opera
 
 2. **Add IAM Policy Binding for Service Account**:
    ```bash
-   gcloud iam service-accounts add-iam-policy-binding drejc-rso-new@balmy-apogee-404909.iam.gserviceaccount.com --role roles/iam.workloadIdentityUser --member "serviceAccount:balmy-apogee-404909.svc.id.goog[default/k8s-drejc]"
+   gcloud iam service-accounts add-iam-policy-binding \
+      drejc-rso-new@balmy-apogee-404909.iam.gserviceaccount.com \
+      --role roles/iam.workloadIdentityUser \
+      --member "serviceAccount:balmy-apogee-404909.svc.id.goog[default/k8s-drejc]"
    ```
 
 3. **Create a Proxy-Only Subnet if Required**:
    ```bash
-   gcloud compute networks subnets create proxy-only-subnet-01 --purpose=REGIONAL_MANAGED_PROXY --role=ACTIVE --region=europe-central2 --network=default --range=10.10.0.0/23
+   gcloud compute networks subnets create proxy-only-subnet-01 \
+      --purpose=REGIONAL_MANAGED_PROXY \
+      --role=ACTIVE \
+      --region=europe-central2 \
+      --network=default \
+      --range=10.10.0.0/23
    ```
 
 4. **Apply BackendConfig for Health Checks**:
